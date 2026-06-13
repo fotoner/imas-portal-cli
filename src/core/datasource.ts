@@ -15,6 +15,8 @@ import type { Article, ScheduleEvent, ListResult } from './schema';
 export interface NewsQuery {
   brands?: string[];
   category?: string;
+  subcategories?: string[];
+  tags?: string[];
   limit?: number;
 }
 
@@ -57,9 +59,22 @@ async function listWithStaleFallback(
 export async function listNews(q: NewsQuery = {}): Promise<ListResult<Article | ScheduleEvent>> {
   const category = (q.category ?? 'NEWS').toUpperCase();
   const limit = q.limit ?? 20;
-  const cacheKey = { op: 'news', category, brands: q.brands ?? [], limit };
+  const cacheKey = {
+    op: 'news',
+    category,
+    brands: q.brands ?? [],
+    subcategory: q.subcategories ?? [],
+    tag: q.tags ?? [],
+    limit,
+  };
   return listWithStaleFallback(cacheKey, async () => {
-    const { articles, total } = await fetchArticleList({ category, brands: q.brands, limit });
+    const { articles, total } = await fetchArticleList({
+      category,
+      brands: q.brands,
+      subcategory: q.subcategories,
+      tag: q.tags,
+      limit,
+    });
     return { items: articles.map(normalizeArticle), total };
   });
 }
@@ -82,6 +97,8 @@ export async function listSchedule(q: ScheduleQuery = {}): Promise<ListResult<Sc
 export interface SearchQuery {
   brands?: string[];
   category?: string;
+  subcategories?: string[];
+  tags?: string[];
   limit?: number;
 }
 
@@ -115,9 +132,23 @@ export async function search(
   const category = (q.category ?? 'NEWS').toUpperCase();
   const limit = q.limit ?? 100;
   const needle = query.trim().toLowerCase();
-  const cacheKey = { op: 'search', q: needle, category, brands: q.brands ?? [], limit };
+  const cacheKey = {
+    op: 'search',
+    q: needle,
+    category,
+    brands: q.brands ?? [],
+    subcategory: q.subcategories ?? [],
+    tag: q.tags ?? [],
+    limit,
+  };
   return listWithStaleFallback(cacheKey, async () => {
-    const { articles } = await fetchArticleList({ category, brands: q.brands, limit });
+    const { articles } = await fetchArticleList({
+      category,
+      brands: q.brands,
+      subcategory: q.subcategories,
+      tag: q.tags,
+      limit,
+    });
     const matched = articles.filter((a) => needle === '' || haystack(a).includes(needle));
     return { items: matched.map(normalizeArticle), total: matched.length };
   });

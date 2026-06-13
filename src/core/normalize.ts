@@ -88,6 +88,8 @@ export function normalizeArticle(raw: RawArticle): Article | ScheduleEvent {
     hashtags: raw.hashtag
       ? raw.hashtag.split(/\s+/).map((h) => h.trim()).filter(Boolean)
       : [],
+    tags: Array.isArray(raw.tags) ? raw.tags : [],
+    tagNames: Array.isArray(raw.tags_name) ? raw.tags_name : [],
   };
 
   if (isInlineHtml(raw.content)) {

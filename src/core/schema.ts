@@ -25,6 +25,8 @@ export const ArticleSchema = z.object({
   displayDate: z.string().optional(),
   thumbnail: z.string().nullable().optional(),
   hashtags: z.array(z.string()).default([]),
+  tags: z.array(z.string()).default([]), // idol/topic slugs (use with `--tag`)
+  tagNames: z.array(z.string()).default([]), // human-readable tag names
   bodyHtml: z.string().optional(),
   bodyText: z.string().optional(),
 });

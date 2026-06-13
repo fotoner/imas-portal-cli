@@ -53,6 +53,8 @@ program
   .description('list portal news, newest first')
   .option('-b, --brand <code...>', 'filter by brand code or alias (see `imas brands`)')
   .option('-c, --category <code>', 'NEWS | SCHEDULE | LIVE-EVENT', 'NEWS')
+  .option('-t, --tag <slug...>', 'filter by idol/topic tag slug, server-side (e.g. mirai_kasuga)')
+  .option('-s, --subcategory <code...>', 'filter by subcategory, server-side (e.g. GOODS)')
   .option('-n, --limit <n>', 'max items', '20')
   .option('--json', 'machine-readable JSON output')
   .action(async (opts) => {
@@ -66,7 +68,13 @@ program
         );
       }
       const brands = resolveBrands(opts.brand, json);
-      const res = await listNews({ brands, category, limit: Number(opts.limit) });
+      const res = await listNews({
+        brands,
+        category,
+        tags: opts.tag,
+        subcategories: opts.subcategory,
+        limit: Number(opts.limit),
+      });
       warnStale(res.stale, res.staleSince);
       if (json) {
         process.stdout.write(`${JSON.stringify({ items: res.items, total: res.total, stale: res.stale })}\n`);
@@ -129,6 +137,8 @@ program
   .description('keyword search over recent news or schedule (within the fetched window)')
   .option('-b, --brand <code...>', 'filter by brand code or alias')
   .option('-c, --category <code>', 'NEWS | SCHEDULE | LIVE-EVENT', 'NEWS')
+  .option('-t, --tag <slug...>', 'narrow to an idol/topic tag slug, server-side')
+  .option('-s, --subcategory <code...>', 'narrow to a subcategory, server-side')
   .option('-n, --limit <n>', 'how many recent items to search through', '100')
   .option('--json', 'machine-readable JSON output')
   .action(async (query: string, opts) => {
@@ -143,7 +153,13 @@ program
       }
       const brands = resolveBrands(opts.brand, json);
       const limit = Number(opts.limit);
-      const res = await search(query, { brands, category, limit });
+      const res = await search(query, {
+        brands,
+        category,
+        tags: opts.tag,
+        subcategories: opts.subcategory,
+        limit,
+      });
       warnStale(res.stale, res.staleSince);
       if (json) {
         process.stdout.write(

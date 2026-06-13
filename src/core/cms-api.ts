@@ -57,6 +57,10 @@ interface ListResponse {
 export interface ListQuery {
   category: string;
   brands?: string[];
+  /** server-side subcategory facet (e.g. GOODS, LIVE-EVENT) */
+  subcategory?: string[];
+  /** server-side tag facet (idol/topic slugs, e.g. mirai_kasuga) */
+  tag?: string[];
   limit?: number;
   sort?: string;
   /** extra keys merged into the `data` JSON (e.g. target_start_date) */
@@ -71,6 +75,8 @@ export interface RawListResult {
 function buildUrl(token: string, q: ListQuery): string {
   const data: Record<string, unknown> = { category: [q.category], ...(q.extra ?? {}) };
   if (q.brands && q.brands.length) data.brand = q.brands;
+  if (q.subcategory && q.subcategory.length) data.subcategory = q.subcategory;
+  if (q.tag && q.tag.length) data.tag = q.tag;
   const params = new URLSearchParams({
     site: 'jp',
     ip: 'idolmaster',

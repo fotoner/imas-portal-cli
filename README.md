@@ -35,6 +35,15 @@ imas brands [--json]           # list known brand codes
 title / hashtags / idol names. The portal API has no server-side full-text search,
 so this is a recent-window search; raise `--limit` to go deeper.
 
+For exact, full-history filtering use the server-side facets the portal's own search
+uses: `--tag <slug>` (idol/topic, e.g. `mirai_kasuga`) and `--subcategory <CODE>`
+(e.g. `GOODS`). Slugs are visible in each item's `tags` field (`--json`):
+
+```bash
+imas news --tag mirai_kasuga --json          # all Mirai Kasuga news, full history
+imas news --subcategory GOODS --brand SIDEM  # all SideM goods news
+```
+
 `show` reads a news article's detail page; `event` reads a live/event entry (their
 detail lives on a different route, so they are separate commands).
 

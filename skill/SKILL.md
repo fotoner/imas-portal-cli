@@ -47,6 +47,10 @@ Schedule items also have: `eventStart, eventEnd, eventPlace, eventUrl, eventDisp
 - "OOO 관련 뉴스 찾아줘" → `imas search "OOO" --json [--limit 200]`. Searches title /
   hashtags / idol names over the most recent `--limit` items (a window, not all history;
   raise `--limit` to search deeper). `matches` in the output is the hit count.
+- "특정 아이돌 뉴스 전부" → use the server-side tag facet (searches ALL history, exact):
+  `imas news --tag <slug> --json`. The slug comes from any item's `tags` field
+  (e.g. `mirai_kasuga`). `--subcategory <CODE>` (GOODS, LIVE-EVENT, OTHER, ...) works the
+  same way. These are faster + complete vs `search` (which is a recent-window keyword filter).
 - "그 기사 내용 알려줘" (user references a news item) → `imas show <id> --json`, summarize `bodyText`.
 - "그 라이브 상세 알려줘" (user references a schedule item) → `imas event <id> --json`,
   summarize `eventDisplayDate`, `eventPlace`, `eventUrl`, and any `children` (sub-events).
