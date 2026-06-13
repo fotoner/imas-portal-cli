@@ -5,3 +5,5 @@ export * from './errors';
 export { listNews, getArticle, listSchedule, getEvent, search } from './datasource';
 export type { NewsQuery, ScheduleQuery, SearchQuery } from './datasource';
 export { cacheDir } from './cache';
+export { IDOLS, getIdol, resolveIdolTag, idolsByBrand, searchIdols } from './idols';
+export type { Idol } from './idols';

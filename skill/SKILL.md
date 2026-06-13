@@ -20,6 +20,7 @@ If `imas` is not installed, run it with npx: `npx -y imas-portal-cli <args>`.
 imas news --json [--brand <CODE>...] [--limit N] [--category NEWS|SCHEDULE|LIVE-EVENT]
 imas schedule --json [--brand <CODE>...] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--limit N]
 imas search <keyword> --json [--brand <CODE>...] [--category NEWS|LIVE-EVENT] [--limit N]
+imas idols [query] --json [--brand <CODE>...]   # roster: find an idol's tag slug
 imas show <id> --json          # one NEWS article incl. full body text (id like 01_7869)
 imas event <id> --json         # one LIVE/EVENT incl. sub-events (id from `imas schedule`)
 imas brands --json             # the known brand codes
@@ -48,9 +49,10 @@ Schedule items also have: `eventStart, eventEnd, eventPlace, eventUrl, eventDisp
   hashtags / idol names over the most recent `--limit` items (a window, not all history;
   raise `--limit` to search deeper). `matches` in the output is the hit count.
 - "특정 아이돌 뉴스 전부" → use the server-side tag facet (searches ALL history, exact):
-  `imas news --tag <slug> --json`. The slug comes from any item's `tags` field
-  (e.g. `mirai_kasuga`). `--subcategory <CODE>` (GOODS, LIVE-EVENT, OTHER, ...) works the
-  same way. These are faster + complete vs `search` (which is a recent-window keyword filter).
+  `imas news --tag <idol> --json`. `--tag` accepts the slug (`mirai_kasuga`), the kanji
+  name (`春日未来`), or kana (`かすがみらい`) — names are resolved to slugs from the bundled
+  341-idol roster. `--subcategory <CODE>` (GOODS, LIVE-EVENT, ...) works the same way.
+  Use `imas idols <name>` to look up an idol's exact slug/brand if a name is ambiguous.
 - "그 기사 내용 알려줘" (user references a news item) → `imas show <id> --json`, summarize `bodyText`.
 - "그 라이브 상세 알려줘" (user references a schedule item) → `imas event <id> --json`,
   summarize `eventDisplayDate`, `eventPlace`, `eventUrl`, and any `children` (sub-events).

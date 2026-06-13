@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { listNews, listSchedule, getArticle, getEvent, search } from '../core/datasource';
 import { resolveBrand, isCategory, BRANDS, KNOWN_BRANDS } from '../core/brands';
+import { resolveIdolTag, idolsByBrand, searchIdols } from '../core/idols';
 import { ImasError } from '../core/errors';
 import type { Article, ScheduleEvent } from '../core/schema';
 import { renderArticles, renderSchedule, renderArticleDetail, renderEventDetail } from './render';
@@ -32,6 +33,12 @@ function resolveBrands(input: string[] | undefined, json: boolean): string[] | u
     out.push(code);
   }
   return out;
+}
+
+/** Map each --tag value through idol name/kana/slug resolution; pass non-idol tags raw. */
+function resolveTags(input: string[] | undefined): string[] | undefined {
+  if (!input || !input.length) return undefined;
+  return input.map((t) => resolveIdolTag(t) ?? t.toLowerCase());
 }
 
 function warnStale(stale: boolean, since?: string): void {
@@ -71,7 +78,7 @@ program
       const res = await listNews({
         brands,
         category,
-        tags: opts.tag,
+        tags: resolveTags(opts.tag),
         subcategories: opts.subcategory,
         limit: Number(opts.limit),
       });
@@ -156,7 +163,7 @@ program
       const res = await search(query, {
         brands,
         category,
-        tags: opts.tag,
+        tags: resolveTags(opts.tag),
         subcategories: opts.subcategory,
         limit,
       });
@@ -194,6 +201,44 @@ program
     } catch (e) {
       emitError(e, json);
     }
+  });
+
+program
+  .command('idols')
+  .argument('[query]', 'optional name / kana / slug to search (e.g. 手毬, temari)')
+  .description('browse the idol roster — find the slug to use with `--tag`')
+  .option('-b, --brand <code...>', 'filter by brand code or alias')
+  .option('--json', 'machine-readable JSON output')
+  .action((query: string | undefined, opts) => {
+    const json = Boolean(opts.json);
+    const brands = resolveBrands(opts.brand, json);
+    let list = brands ? idolsByBrand().filter((i) => brands.includes(i.brand)) : idolsByBrand();
+    if (query) {
+      const hits = new Set(searchIdols(query).map((i) => i.code));
+      list = list.filter((i) => hits.has(i.code));
+    }
+    if (json) {
+      process.stdout.write(`${JSON.stringify(list)}\n`);
+      return;
+    }
+    if (!query && !brands) {
+      // overview: per-brand counts
+      const counts = new Map<string, number>();
+      for (const i of list) counts.set(i.brand, (counts.get(i.brand) ?? 0) + 1);
+      const lines = [...counts.entries()].map(([b, n]) => `  ${b.padEnd(16)} ${n}`);
+      process.stdout.write(
+        `${list.length} idols. Filter with --brand or a name/slug query, e.g. \`imas idols --brand gakumas\`:\n${lines.join('\n')}\n`,
+      );
+      return;
+    }
+    if (!list.length) {
+      process.stderr.write(`no idol matches${query ? ` for "${query}"` : ''}\n`);
+      process.exit(0);
+    }
+    const body = list
+      .map((i) => `  ${i.code.padEnd(22)} ${i.name}${i.kana ? `  (${i.kana})` : ''}  [${i.brand}]`)
+      .join('\n');
+    process.stdout.write(`${body}\n`);
   });
 
 program

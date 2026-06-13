@@ -26,6 +26,7 @@ Requires Node 20+.
 imas news [--brand <CODE>...] [--category NEWS|SCHEDULE|LIVE-EVENT] [--limit N] [--json]
 imas schedule [--brand <CODE>...] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--limit N] [--json]
 imas search <keyword> [--brand <CODE>...] [--category NEWS|LIVE-EVENT] [--limit N] [--json]
+imas idols [query] [--brand <CODE>...] [--json]   # browse the 341-idol roster (find tag slugs)
 imas show <id> [--json]        # one NEWS article + full body, e.g. imas show 01_7869
 imas event <id> [--json]       # one LIVE/EVENT + sub-events, id from `imas schedule`
 imas brands [--json]           # list known brand codes
@@ -39,9 +40,14 @@ For exact, full-history filtering use the server-side facets the portal's own se
 uses: `--tag <slug>` (idol/topic, e.g. `mirai_kasuga`) and `--subcategory <CODE>`
 (e.g. `GOODS`). Slugs are visible in each item's `tags` field (`--json`):
 
+`--tag` also accepts an idol's name (kanji or kana), resolved to a slug via the bundled
+341-idol roster (`imas idols` to browse it):
+
 ```bash
-imas news --tag mirai_kasuga --json          # all Mirai Kasuga news, full history
+imas news --tag mirai_kasuga --json          # by slug
+imas news --tag 月村手毬                       # by kanji name (resolved to temari_tsukimura)
 imas news --subcategory GOODS --brand SIDEM  # all SideM goods news
+imas idols --brand gakumas                   # list Gakumas idols + their slugs
 ```
 
 `show` reads a news article's detail page; `event` reads a live/event entry (their
