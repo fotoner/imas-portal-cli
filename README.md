@@ -1,0 +1,81 @@
+# imas-portal-cli
+
+Query **THE iDOLM@STER** official portal ([idolmaster-official.jp](https://idolmaster-official.jp/))
+news and live/event schedule from your terminal, or from an LLM agent.
+
+It is a clean CLI with a `--json` mode and a bundled Claude Code skill. The primary
+consumer is an agent (the skill tells it how to call the CLI); humans use the same
+commands for quick lookups.
+
+> Unofficial. Reads the portal's public content API + pages for personal/agent use.
+> Be polite, link back to the source, and don't redistribute article bodies/images.
+
+## Install
+
+```bash
+npm install -g imas-portal-cli
+# or run without installing:
+npx -y imas-portal-cli news --limit 5
+```
+
+Requires Node 20+.
+
+## Usage
+
+```bash
+imas news [--brand <CODE>...] [--category NEWS|SCHEDULE|LIVE-EVENT] [--limit N] [--json]
+imas schedule [--brand <CODE>...] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--limit N] [--json]
+imas show <id> [--json]        # one article + full body, e.g. imas show 01_7869
+imas brands [--json]           # list known brand codes
+```
+
+Default output is a compact table; `--json` emits structured data for machines/agents.
+
+### Examples
+
+```bash
+imas news --limit 5
+imas news --brand CINDERELLAGIRLS --json
+imas schedule --brand SIDEM --from 2026-07-01 --to 2026-07-31
+imas show 01_7869
+```
+
+Brand codes: `IDOLMASTER` (765), `CINDERELLAGIRLS`, `MILLIONLIVE`, `SIDEM`,
+`SHINYCOLORS`, `GAKUEN`. Aliases like `cg`, `gakumas`, `765` work too.
+
+## Agent / Claude Code skill
+
+`skill/SKILL.md` documents the CLI for an agent. Point your agent at it (or copy it into
+your skills dir) and it can answer things like "이번 달 데레마스 라이브 일정?" by shelling
+out to `imas schedule --json --brand CINDERELLAGIRLS ...`.
+
+## JSON shape
+
+`news`/`schedule` → `{ "items": [...], "total": N, "stale": false }`.
+Each item: `id, title, url, category, brands[], publishedAt` (ISO-8601 +09:00),
+`displayDate, hashtags[]`. Schedule items add `eventStart, eventEnd, eventPlace,
+eventUrl, eventDisplayDate, eventType[], eventArea[]`. `show` adds `bodyText`/`bodyHtml`.
+
+Errors → `{ "error": { "kind": "API_DOWN|NOT_FOUND|BAD_ARG|PARSE_FAILED", "message": "..." } }`
+with a non-zero exit. An empty list is success. `"stale": true` means the portal API was
+unreachable and you got cached data.
+
+## How it works
+
+The portal is a Next.js SPA on S3/CloudFront with no public feed. News + schedule come
+from an undocumented CMS content API reached via a short token bootstrap
+(`Token/get` → `Article/list`). Article bodies are read from each detail page's embedded
+`__NEXT_DATA__`. No headless browser, no auth. See the design doc for the full story.
+
+## Develop
+
+```bash
+npm install
+npm test          # vitest, offline (recorded fixtures via undici MockAgent)
+npm run dev -- news --limit 3
+npm run build     # tsup -> dist/imas.js
+```
+
+## License
+
+MIT

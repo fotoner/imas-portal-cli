@@ -1,0 +1,177 @@
+{
+    "statusCode": 200,
+    "data": {
+        "apiStatus": true,
+        "total_count": 219,
+        "start": 0,
+        "limit": 3,
+        "count": 3,
+        "time": 0,
+        "article_list": [
+            {
+                "publish_status": "publish",
+                "content": "cms_content\/jp\/ja\/LIVE-EVENT\/1775453510_21862.html",
+                "title": "315 Production presents F\uff20NTASTIC BATTLE FES \uff5eWanna step in\uff5e \u5e55\u5f35\u516c\u6f14",
+                "enddate": 32503561140,
+                "event_logo": "\/idolmaster\/jp\/live-event\/009\/2026\/04\/pwniY68RKd41jv7quYVgAK0j2LzsGLXO.png",
+                "event_enddate": 1800802740,
+                "children": [],
+                "_p_key": "idolmaster_jp",
+                "article_type": "url_link",
+                "brand": [
+                    {
+                        "name": "SideM",
+                        "code": "SIDEM"
+                    }
+                ],
+                "thumbnail": "\/idolmaster\/jp\/live-event\/009\/2026\/04\/HYsXrQwxCZWDKcr87eZdoiaSt78TWma7.jpeg?_=9db4c55fcf9f5ebc7f070f41b8b0d1d3",
+                "event_url": "https:\/\/idolmaster-official.jp\/news\/01_18429",
+                "_id": "21862",
+                "branch_no": 2,
+                "updated": 1775453883,
+                "dspdate": "2026\/04\/06 00:00",
+                "event_startdate": 1800630000,
+                "delflg": "0",
+                "categories": {
+                    "name": "Live\/Event",
+                    "code": "LIVE-EVENT",
+                    "subcategory": [
+                        {
+                            "code": ""
+                        }
+                    ]
+                },
+                "event_place": "\u5e55\u5f35\u30a4\u30d9\u30f3\u30c8\u30db\u30fc\u30eb\n\u203b\u8a73\u7d30\u306f\u5f8c\u65e5\u767a\u8868\u4e88\u5b9a",
+                "region": "jp",
+                "listed_subcategories": "LIVE-EVENT",
+                "url_name": null,
+                "ip": "idolmaster",
+                "event_dspdate": "2027\u5e741\u670823(\u571f)\u30fb24(\u65e5)",
+                "event_area": [
+                    "dm_event"
+                ],
+                "path": "01_18624",
+                "site": "jp",
+                "event_type": [
+                    "mr_event"
+                ],
+                "startdate": 1775401200,
+                "news_thumbnail": null,
+                "hashtag": null,
+                "general_election_flg": false,
+                "filename": "",
+                "sp_thumbnail": "",
+                "url": "https:\/\/idolmaster-official.jp\/live-event\/01_18624.html"
+            },
+            {
+                "_id": "21861",
+                "publish_status": "publish",
+                "enddate": 32503561140,
+                "event_enddate": 1798383540,
+                "children": [],
+                "_p_key": "idolmaster_jp",
+                "article_type": "url_link",
+                "brand": [
+                    {
+                        "name": "SideM",
+                        "code": "SIDEM"
+                    }
+                ],
+                "branch_no": 1,
+                "event_url": "https:\/\/idolmaster-official.jp\/news\/01_18429",
+                "event_startdate": 1798210800,
+                "title": "315 Production presents F\uff20NTASTIC BATTLE FES \uff5eWanna step in\uff5e \u9577\u91ce\u516c\u6f14",
+                "dspdate": "2026\/04\/06 00:00",
+                "delflg": "0",
+                "categories": {
+                    "name": "Live\/Event",
+                    "code": "LIVE-EVENT",
+                    "subcategory": [
+                        {
+                            "code": ""
+                        }
+                    ]
+                },
+                "updated": 1775453882,
+                "path": "01_18623",
+                "region": "jp",
+                "listed_subcategories": "LIVE-EVENT",
+                "thumbnail": "\/idolmaster\/jp\/live-event\/009\/2026\/04\/qkvZQRVN1MIubQbXmWJmbizhYSKUaHdm.jpeg?_=9db4c55fcf9f5ebc7f070f41b8b0d1d3",
+                "event_dspdate": "2026\u5e7412\u670826\u65e5(\u571f)\u30fb27\u65e5(\u65e5) ",
+                "url_name": null,
+                "event_place": "\u30db\u30af\u30c8\u6587\u5316\u30db\u30fc\u30eb\n\u203b\u8a73\u7d30\u306f\u5f8c\u65e5\u767a\u8868\u4e88\u5b9a",
+                "ip": "idolmaster",
+                "content": "cms_content\/jp\/ja\/LIVE-EVENT\/1775453392_21861.html",
+                "event_area": [
+                    "dm_event"
+                ],
+                "site": "jp",
+                "event_logo": "\/idolmaster\/jp\/live-event\/009\/2026\/04\/G6J6rkA5hkn9aFHB7gvPmgLuwVtZzfNQ.png",
+                "event_type": [
+                    "mr_event"
+                ],
+                "startdate": 1775401200,
+                "news_thumbnail": null,
+                "hashtag": null,
+                "general_election_flg": false,
+                "filename": "",
+                "sp_thumbnail": "",
+                "url": "https:\/\/idolmaster-official.jp\/live-event\/01_18623.html"
+            },
+            {
+                "article_type": "url_link",
+                "brand": [
+                    {
+                        "name": "\u5b66\u5712\u30a2\u30a4\u30c9\u30eb\u30de\u30b9\u30bf\u30fc",
+                        "code": "GAKUEN"
+                    }
+                ],
+                "event_area": [
+                    "dm_event"
+                ],
+                "path": "01_18484",
+                "event_startdate": 1794013200,
+                "_p_key": "idolmaster_jp",
+                "ip": "idolmaster",
+                "children": [],
+                "updated": 1773901562,
+                "branch_no": 1,
+                "dspdate": "2026\/03\/19 15:00",
+                "listed_subcategories": "LIVE-EVENT",
+                "publish_status": "publish",
+                "event_enddate": 1794139200,
+                "event_type": [
+                    "oth_event"
+                ],
+                "region": "jp",
+                "thumbnail": "\/idolmaster\/jp\/live-event\/012\/2026\/03\/Xg208xraJQimy4cMQvaFclOwVgFpVqUF.jpeg?_=9db4c55fcf9f5ebc7f070f41b8b0d1d3",
+                "delflg": "0",
+                "event_logo": "\/idolmaster\/jp\/live-event\/012\/2026\/03\/DSnj2elK3mbB0a9Exzop7EoHY6G9paQP.png",
+                "site": "jp",
+                "enddate": 32503561140,
+                "event_url": "https:\/\/idolmaster-official.jp\/live_event\/gkmas_livetour_shirube\/",
+                "startdate": 1773900000,
+                "event_dspdate": "2026\u5e7411\u67087\u65e5(\u571f)\u30fb8\u65e5(\u65e5)",
+                "content": "cms_content\/jp\/ja\/LIVE-EVENT\/1773901410_21680.html",
+                "categories": {
+                    "name": "Live\/Event",
+                    "code": "LIVE-EVENT",
+                    "subcategory": [
+                        {
+                            "code": ""
+                        }
+                    ]
+                },
+                "event_place": "K\u30a2\u30ea\u30fc\u30ca\u6a2a\u6d5c",
+                "_id": "21680",
+                "title": "\u5b66\u5712\u30a2\u30a4\u30c9\u30eb\u30de\u30b9\u30bf\u30fc LIVE TOUR -\u6a19- \u30d5\u30a1\u30a4\u30ca\u30eb\u516c\u6f14",
+                "news_thumbnail": null,
+                "hashtag": null,
+                "general_election_flg": false,
+                "filename": "",
+                "sp_thumbnail": "",
+                "url": "https:\/\/idolmaster-official.jp\/live-event\/01_18484.html"
+            }
+        ]
+    }
+}
