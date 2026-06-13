@@ -1,9 +1,9 @@
 import { Command } from 'commander';
-import { listNews, listSchedule, getArticle } from '../core/datasource';
+import { listNews, listSchedule, getArticle, getEvent } from '../core/datasource';
 import { resolveBrand, isCategory, BRANDS, KNOWN_BRANDS } from '../core/brands';
 import { ImasError } from '../core/errors';
 import type { Article, ScheduleEvent } from '../core/schema';
-import { renderArticles, renderSchedule, renderArticleDetail } from './render';
+import { renderArticles, renderSchedule, renderArticleDetail, renderEventDetail } from './render';
 
 const VERSION = '0.1.0';
 
@@ -118,6 +118,22 @@ program
       const article = await getArticle(id);
       if (json) process.stdout.write(`${JSON.stringify(article)}\n`);
       else process.stdout.write(`${renderArticleDetail(article)}\n`);
+    } catch (e) {
+      emitError(e, json);
+    }
+  });
+
+program
+  .command('event')
+  .argument('<id>', 'live-event id from `imas schedule`, e.g. 01_18484')
+  .description('show one live/event with full detail and sub-events')
+  .option('--json', 'machine-readable JSON output')
+  .action(async (id: string, opts) => {
+    const json = Boolean(opts.json);
+    try {
+      const event = await getEvent(id);
+      if (json) process.stdout.write(`${JSON.stringify(event)}\n`);
+      else process.stdout.write(`${renderEventDetail(event)}\n`);
     } catch (e) {
       emitError(e, json);
     }

@@ -25,9 +25,13 @@ Requires Node 20+.
 ```bash
 imas news [--brand <CODE>...] [--category NEWS|SCHEDULE|LIVE-EVENT] [--limit N] [--json]
 imas schedule [--brand <CODE>...] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--limit N] [--json]
-imas show <id> [--json]        # one article + full body, e.g. imas show 01_7869
+imas show <id> [--json]        # one NEWS article + full body, e.g. imas show 01_7869
+imas event <id> [--json]       # one LIVE/EVENT + sub-events, id from `imas schedule`
 imas brands [--json]           # list known brand codes
 ```
+
+`show` reads a news article's detail page; `event` reads a live/event entry (their
+detail lives on a different route, so they are separate commands).
 
 Default output is a compact table; `--json` emits structured data for machines/agents.
 

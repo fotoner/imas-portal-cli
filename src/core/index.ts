@@ -2,6 +2,6 @@
 export * from './schema';
 export * from './brands';
 export * from './errors';
-export { listNews, getArticle, listSchedule } from './datasource';
+export { listNews, getArticle, listSchedule, getEvent } from './datasource';
 export type { NewsQuery, ScheduleQuery } from './datasource';
 export { cacheDir } from './cache';

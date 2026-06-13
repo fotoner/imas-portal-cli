@@ -93,3 +93,21 @@ function filterByDate(items: ScheduleEvent[], from?: string, to?: string): Sched
 export async function getArticle(id: string): Promise<Article | ScheduleEvent> {
   return normalizeArticle(await fetchArticleDetail(id));
 }
+
+/**
+ * Single live/event detail by id. Live-event detail does NOT live at /news/{id}
+ * (that's `getArticle`/`imas show`, news only). The whole LIVE-EVENT catalog is
+ * small (~220 items) and the list item already carries full detail incl. children,
+ * so we fetch the full list once (stale-cached) and find the id. Reliable, one call.
+ */
+export async function getEvent(id: string): Promise<ScheduleEvent> {
+  const res = await listWithStaleFallback({ op: 'event-all' }, async () => {
+    const { articles, total } = await fetchArticleList({ category: 'LIVE-EVENT', limit: 400 });
+    return { items: articles.map(normalizeArticle), total };
+  });
+  const found = (res.items as ScheduleEvent[]).find((e) => e.id === id);
+  if (!found) {
+    throw new ImasError('NOT_FOUND', `live event "${id}" not found. Run \`imas schedule\` to see valid ids.`);
+  }
+  return found;
+}

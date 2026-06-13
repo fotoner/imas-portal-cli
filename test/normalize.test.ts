@@ -49,6 +49,22 @@ describe('normalizeArticle', () => {
     expect(Array.isArray(e.eventType)).toBe(true);
   });
 
+  it('normalizes sub-events (children) of a multi-leg event', () => {
+    const e = normalizeArticle({
+      path: '01_tour',
+      title: 'tour',
+      categories: { code: 'LIVE-EVENT' },
+      event_startdate: 1675825200,
+      children: [
+        { title: 'leg 1', event_dspdate: '2026/08/20', event_startdate: 1787000000, event_place: 'Fukui' },
+        { title: 'leg 2', event_dspdate: '2026/09/05', event_place: 'Fukuoka' },
+      ],
+    }) as ScheduleEvent;
+    expect(e.children).toHaveLength(2);
+    expect(e.children[0]!.title).toBe('leg 1');
+    expect(e.children[0]!.eventPlace).toBe('Fukui');
+  });
+
   it('keeps an unknown brand code (tolerant ingest)', () => {
     const a = normalizeArticle({
       path: '01_test',

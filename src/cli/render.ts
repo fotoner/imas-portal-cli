@@ -41,6 +41,30 @@ export function renderSchedule(items: ScheduleEvent[]): string {
     .join('\n');
 }
 
+export function renderEventDetail(e: ScheduleEvent): string {
+  const when =
+    e.eventDisplayDate ??
+    (e.eventStart ? `${e.eventStart}${e.eventEnd ? ` ~ ${e.eventEnd}` : ''}` : '—');
+  const lines = [
+    e.title,
+    `  ${e.eventUrl ?? e.url}`,
+    `  when:   ${when.replace(/\n+/g, ' ')}`,
+    `  place:  ${e.eventPlace ?? '—'}`,
+    `  brands: ${e.brands.join(', ') || '—'}`,
+  ];
+  const tags = [...e.eventType, ...e.eventArea];
+  if (tags.length) lines.push(`  type:   ${tags.join(', ')}`);
+  if (e.children.length) {
+    lines.push('', '  sub-events:');
+    for (const c of e.children) {
+      const w = c.eventDisplayDate ?? c.eventStart ?? '';
+      const p = c.eventPlace ? ` @ ${c.eventPlace}` : '';
+      lines.push(`   - ${c.title ?? ''}  ${w}${p}`.replace(/\n+/g, ' '));
+    }
+  }
+  return lines.join('\n');
+}
+
 export function renderArticleDetail(a: Article): string {
   const lines = [
     a.title,

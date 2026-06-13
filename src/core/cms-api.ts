@@ -40,6 +40,7 @@ export interface RawArticle {
   event_url?: string;
   event_type?: string[];
   event_area?: string[];
+  children?: RawArticle[];
   [key: string]: unknown;
 }
 

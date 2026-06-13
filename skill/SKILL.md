@@ -19,9 +19,13 @@ If `imas` is not installed, run it with npx: `npx -y imas-portal-cli <args>`.
 ```bash
 imas news --json [--brand <CODE>...] [--limit N] [--category NEWS|SCHEDULE|LIVE-EVENT]
 imas schedule --json [--brand <CODE>...] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--limit N]
-imas show <id> --json          # one article incl. full body text (id like 01_7869)
+imas show <id> --json          # one NEWS article incl. full body text (id like 01_7869)
+imas event <id> --json         # one LIVE/EVENT incl. sub-events (id from `imas schedule`)
 imas brands --json             # the known brand codes
 ```
+
+`show` is for news articles; `event` is for live/event schedule items (their detail
+lives on a different route). If `show` returns NOT_FOUND for a schedule id, use `event`.
 
 Brand codes: `IDOLMASTER` (765), `CINDERELLAGIRLS`, `MILLIONLIVE`, `SIDEM`,
 `SHINYCOLORS`, `GAKUEN`. Aliases like `cg`, `gakumas`, `765` also work.
@@ -39,7 +43,9 @@ Schedule items also have: `eventStart, eventEnd, eventPlace, eventUrl, eventDisp
   `imas schedule --json --brand CINDERELLAGIRLS --from 2026-06-01 --to 2026-06-30`
   then summarize each event's `title`, `eventDisplayDate`, `eventPlace`, `eventUrl`.
 - "아이마스 최신 뉴스 5개" → `imas news --json --limit 5`, list `title` + `publishedAt` + `url`.
-- "그 기사 내용 알려줘" (user references an item) → `imas show <id> --json`, summarize `bodyText`.
+- "그 기사 내용 알려줘" (user references a news item) → `imas show <id> --json`, summarize `bodyText`.
+- "그 라이브 상세 알려줘" (user references a schedule item) → `imas event <id> --json`,
+  summarize `eventDisplayDate`, `eventPlace`, `eventUrl`, and any `children` (sub-events).
 
 ## Notes for the agent
 

@@ -30,6 +30,16 @@ export const ArticleSchema = z.object({
 });
 export type Article = z.infer<typeof ArticleSchema>;
 
+/** A sub-event inside a multi-leg live/event (e.g. a tour's individual shows). */
+export const SubEventSchema = z.object({
+  title: z.string().optional(),
+  eventDisplayDate: z.string().nullable().optional(),
+  eventStart: z.string().nullable().optional(),
+  eventEnd: z.string().nullable().optional(),
+  eventPlace: z.string().nullable().optional(),
+});
+export type SubEvent = z.infer<typeof SubEventSchema>;
+
 export const ScheduleEventSchema = ArticleSchema.extend({
   eventStart: z.string().nullable().optional(),
   eventEnd: z.string().nullable().optional(),
@@ -38,6 +48,7 @@ export const ScheduleEventSchema = ArticleSchema.extend({
   eventDisplayDate: z.string().nullable().optional(),
   eventType: z.array(z.string()).default([]),
   eventArea: z.array(z.string()).default([]),
+  children: z.array(SubEventSchema).default([]),
   allDay: z.boolean().default(false),
 });
 export type ScheduleEvent = z.infer<typeof ScheduleEventSchema>;

@@ -1,5 +1,5 @@
 import type { RawArticle } from './cms-api';
-import type { Article, ScheduleEvent } from './schema';
+import type { Article, ScheduleEvent, SubEvent } from './schema';
 
 const PORTAL = 'https://idolmaster-official.jp';
 /** The CMS uses ~year-3000 timestamps as a "no end date" sentinel. */
@@ -51,6 +51,16 @@ function isInlineHtml(content?: string): boolean {
   return typeof content === 'string' && content.trim().startsWith('<');
 }
 
+function normalizeSubEvent(raw: RawArticle): SubEvent {
+  return {
+    title: raw.title,
+    eventDisplayDate: raw.event_dspdate ?? null,
+    eventStart: toJst(raw.event_startdate) ?? null,
+    eventEnd: toJst(raw.event_enddate) ?? null,
+    eventPlace: raw.event_place ? raw.event_place.replace(/\s*\n\s*/g, ' / ').trim() : null,
+  };
+}
+
 /**
  * Raw CMS article (from list OR detail page) -> canonical Article / ScheduleEvent.
  * Tolerant ingest: brand/category codes pass through as plain strings (no enum), so
@@ -96,6 +106,7 @@ export function normalizeArticle(raw: RawArticle): Article | ScheduleEvent {
     eventDisplayDate: raw.event_dspdate ?? null,
     eventType: raw.event_type ?? [],
     eventArea: raw.event_area ?? [],
+    children: (raw.children ?? []).map(normalizeSubEvent),
     allDay: false,
   };
   return event;
