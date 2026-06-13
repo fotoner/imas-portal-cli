@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { listNews, listSchedule, getArticle, getEvent } from '../core/datasource';
+import { listNews, listSchedule, getArticle, getEvent, search } from '../core/datasource';
 import { resolveBrand, isCategory, BRANDS, KNOWN_BRANDS } from '../core/brands';
 import { ImasError } from '../core/errors';
 import type { Article, ScheduleEvent } from '../core/schema';
@@ -118,6 +118,47 @@ program
       const article = await getArticle(id);
       if (json) process.stdout.write(`${JSON.stringify(article)}\n`);
       else process.stdout.write(`${renderArticleDetail(article)}\n`);
+    } catch (e) {
+      emitError(e, json);
+    }
+  });
+
+program
+  .command('search')
+  .argument('<query>', 'keyword: title / hashtag / idol name')
+  .description('keyword search over recent news or schedule (within the fetched window)')
+  .option('-b, --brand <code...>', 'filter by brand code or alias')
+  .option('-c, --category <code>', 'NEWS | SCHEDULE | LIVE-EVENT', 'NEWS')
+  .option('-n, --limit <n>', 'how many recent items to search through', '100')
+  .option('--json', 'machine-readable JSON output')
+  .action(async (query: string, opts) => {
+    const json = Boolean(opts.json);
+    try {
+      const category = String(opts.category).toUpperCase();
+      if (!isCategory(category)) {
+        emitError(
+          new ImasError('BAD_ARG', `unknown category "${opts.category}". valid: NEWS, SCHEDULE, LIVE-EVENT`),
+          json,
+        );
+      }
+      const brands = resolveBrands(opts.brand, json);
+      const limit = Number(opts.limit);
+      const res = await search(query, { brands, category, limit });
+      warnStale(res.stale, res.staleSince);
+      if (json) {
+        process.stdout.write(
+          `${JSON.stringify({ query, items: res.items, matches: res.total, searched: limit, stale: res.stale })}\n`,
+        );
+      } else if (!res.items.length) {
+        process.stderr.write(`no matches for "${query}" in the last ${limit} ${category} items (raise --limit to search deeper)\n`);
+        process.exit(0);
+      } else {
+        const isSchedule = category === 'LIVE-EVENT' || category === 'SCHEDULE';
+        const body = isSchedule
+          ? renderSchedule(res.items as ScheduleEvent[])
+          : renderArticles(res.items as Article[]);
+        process.stdout.write(`${body}\n`);
+      }
     } catch (e) {
       emitError(e, json);
     }

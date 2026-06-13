@@ -27,6 +27,8 @@ export interface RawArticle {
   thumbnail?: string;
   content?: string;
   hashtag?: string;
+  tags?: string[];
+  tags_name?: string[];
   brand?: Array<{ code?: string; name?: string }>;
   categories?: {
     code?: string;

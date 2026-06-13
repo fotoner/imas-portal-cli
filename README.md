@@ -25,10 +25,15 @@ Requires Node 20+.
 ```bash
 imas news [--brand <CODE>...] [--category NEWS|SCHEDULE|LIVE-EVENT] [--limit N] [--json]
 imas schedule [--brand <CODE>...] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--limit N] [--json]
+imas search <keyword> [--brand <CODE>...] [--category NEWS|LIVE-EVENT] [--limit N] [--json]
 imas show <id> [--json]        # one NEWS article + full body, e.g. imas show 01_7869
 imas event <id> [--json]       # one LIVE/EVENT + sub-events, id from `imas schedule`
 imas brands [--json]           # list known brand codes
 ```
+
+`search` filters the most recent `--limit` items (default 100) by keyword over
+title / hashtags / idol names. The portal API has no server-side full-text search,
+so this is a recent-window search; raise `--limit` to go deeper.
 
 `show` reads a news article's detail page; `event` reads a live/event entry (their
 detail lives on a different route, so they are separate commands).
@@ -40,6 +45,7 @@ Default output is a compact table; `--json` emits structured data for machines/a
 ```bash
 imas news --limit 5
 imas news --brand CINDERELLAGIRLS --json
+imas search "ミリオン" --limit 200
 imas schedule --brand SIDEM --from 2026-07-01 --to 2026-07-31
 imas show 01_7869
 ```

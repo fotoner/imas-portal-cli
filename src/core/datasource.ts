@@ -1,4 +1,5 @@
 import { fetchArticleList } from './cms-api';
+import type { RawArticle } from './cms-api';
 import { fetchArticleDetail } from './detail-scrape';
 import { normalizeArticle } from './normalize';
 import { ImasError } from './errors';
@@ -76,6 +77,50 @@ export async function listSchedule(q: ScheduleQuery = {}): Promise<ListResult<Sc
     return { items, total };
   });
   return res as ListResult<ScheduleEvent>;
+}
+
+export interface SearchQuery {
+  brands?: string[];
+  category?: string;
+  limit?: number;
+}
+
+/**
+ * Searchable text for a raw article: title + hashtags + idol names + subcategory,
+ * plus venue / event display date for live-events (so venue search works).
+ */
+function haystack(a: RawArticle): string {
+  const parts: string[] = [];
+  if (a.title) parts.push(a.title);
+  if (a.hashtag) parts.push(a.hashtag);
+  if (Array.isArray(a.tags_name)) parts.push(a.tags_name.join(' '));
+  if (Array.isArray(a.tags)) parts.push(a.tags.join(' '));
+  const sub = (a.categories?.subcategory ?? []).map((s) => s.name).filter(Boolean).join(' ');
+  if (sub) parts.push(sub);
+  if (a.event_place) parts.push(a.event_place);
+  if (a.event_dspdate) parts.push(a.event_dspdate);
+  return parts.join(' ').toLowerCase();
+}
+
+/**
+ * Keyword search. The CMS API has no server-side freeword search (unknown query
+ * keys zero out results), so this fetches the most recent `limit` items in the
+ * category and filters client-side over title / hashtags / idol names. It searches
+ * a recent WINDOW, not the full ~11k-item history — raise `limit` to search deeper.
+ */
+export async function search(
+  query: string,
+  q: SearchQuery = {},
+): Promise<ListResult<Article | ScheduleEvent>> {
+  const category = (q.category ?? 'NEWS').toUpperCase();
+  const limit = q.limit ?? 100;
+  const needle = query.trim().toLowerCase();
+  const cacheKey = { op: 'search', q: needle, category, brands: q.brands ?? [], limit };
+  return listWithStaleFallback(cacheKey, async () => {
+    const { articles } = await fetchArticleList({ category, brands: q.brands, limit });
+    const matched = articles.filter((a) => needle === '' || haystack(a).includes(needle));
+    return { items: matched.map(normalizeArticle), total: matched.length };
+  });
 }
 
 /** Client-side date filtering on normalized eventStart (robust; no guessing API params). */
