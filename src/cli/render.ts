@@ -1,4 +1,6 @@
 import type { Article, ScheduleEvent } from '../core/schema';
+import type { Idol } from '../core/idols';
+import type { IdolProfile } from '../core/idol-detail';
 
 /** Truncate to a display width, counting CJK/full-width chars as 2 columns. */
 function truncate(s: string, max: number): string {
@@ -62,6 +64,24 @@ export function renderEventDetail(e: ScheduleEvent): string {
       lines.push(`   - ${c.title ?? ''}  ${w}${p}`.replace(/\n+/g, ' '));
     }
   }
+  return lines.join('\n');
+}
+
+export function renderIdol(i: Idol, profile: IdolProfile | null): string {
+  const lines = [`${i.name}${i.kana ? `  (${i.kana})` : ''}   [${i.brand}]  ·  ${i.code}`];
+  const basics: string[] = [];
+  if (i.age) basics.push(`age ${i.age}`);
+  if (i.birthday) basics.push(`birthday ${i.birthday}`);
+  if (basics.length) lines.push(`  ${basics.join('   ·   ')}`);
+  if (profile) {
+    if (profile.cv) lines.push(`  CV: ${profile.cv}`);
+    for (const [k, v] of Object.entries(profile.fields)) {
+      if (k === '年齢' || k === '誕生日') continue; // already shown from the roster
+      lines.push(`  ${k}: ${v}`);
+    }
+  }
+  if (i.detailUrl) lines.push(`  ${i.detailUrl}`);
+  if (i.images[0]) lines.push(`  image: ${i.images[0]}`);
   return lines.join('\n');
 }
 

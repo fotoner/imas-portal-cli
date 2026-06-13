@@ -1,10 +1,12 @@
 import { Command } from 'commander';
 import { listNews, listSchedule, getArticle, getEvent, search } from '../core/datasource';
 import { resolveBrand, isCategory, BRANDS, KNOWN_BRANDS } from '../core/brands';
-import { resolveIdolTag, idolsByBrand, searchIdols } from '../core/idols';
+import { resolveIdolTag, idolsByBrand, searchIdols, idolsByBirthday, getIdol } from '../core/idols';
+import { fetchIdolProfile } from '../core/idol-detail';
+import type { Idol } from '../core/idols';
 import { ImasError } from '../core/errors';
 import type { Article, ScheduleEvent } from '../core/schema';
-import { renderArticles, renderSchedule, renderArticleDetail, renderEventDetail } from './render';
+import { renderArticles, renderSchedule, renderArticleDetail, renderEventDetail, renderIdol } from './render';
 
 const VERSION = '0.1.0';
 
@@ -39,6 +41,46 @@ function resolveBrands(input: string[] | undefined, json: boolean): string[] | u
 function resolveTags(input: string[] | undefined): string[] | undefined {
   if (!input || !input.length) return undefined;
   return input.map((t) => resolveIdolTag(t) ?? t.toLowerCase());
+}
+
+/** Resolve a query to exactly one idol, or emit a helpful error. */
+function resolveOneIdol(query: string, json: boolean): Idol {
+  const code = resolveIdolTag(query);
+  if (code) {
+    const idol = getIdol(code);
+    if (idol) return idol;
+  }
+  const hits = searchIdols(query);
+  if (hits.length === 1) return hits[0]!;
+  if (hits.length === 0) {
+    emitError(new ImasError('NOT_FOUND', `no idol matches "${query}". try \`imas idols ${query}\``), json);
+  }
+  emitError(
+    new ImasError(
+      'BAD_ARG',
+      `"${query}" matches ${hits.length} idols: ${hits.slice(0, 8).map((i) => i.code).join(', ')}${hits.length > 8 ? ' …' : ''}. be more specific.`,
+    ),
+    json,
+  );
+}
+
+/** today's date as MM/DD in JST (idols are Japanese). */
+function mmddTodayJst(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Tokyo',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+  const mo = parts.find((p) => p.type === 'month')?.value ?? '01';
+  const da = parts.find((p) => p.type === 'day')?.value ?? '01';
+  return `${mo}/${da}`;
+}
+
+function normalizeMmdd(s: string | undefined): string | null {
+  if (!s) return null;
+  const m = /^(\d{1,2})\/(\d{1,2})$/.exec(s.trim());
+  if (!m) return null;
+  return `${m[1]!.padStart(2, '0')}/${m[2]!.padStart(2, '0')}`;
 }
 
 function warnStale(stale: boolean, since?: string): void {
@@ -239,6 +281,55 @@ program
       .map((i) => `  ${i.code.padEnd(22)} ${i.name}${i.kana ? `  (${i.kana})` : ''}  [${i.brand}]`)
       .join('\n');
     process.stdout.write(`${body}\n`);
+  });
+
+program
+  .command('idol')
+  .argument('<query>', 'idol name / kana / slug, e.g. 月村手毬 or temari_tsukimura')
+  .description("show one idol's encyclopedia profile (--full scrapes CV, height, etc.)")
+  .option('--full', 'fetch the full 名鑑 profile (CV, blood type, zodiac, height, hobby, …)')
+  .option('--json', 'machine-readable JSON output')
+  .action(async (query: string, opts) => {
+    const json = Boolean(opts.json);
+    try {
+      const idol = resolveOneIdol(query, json);
+      const profile = opts.full && idol.detailUrl ? await fetchIdolProfile(idol.detailUrl) : null;
+      if (json) {
+        process.stdout.write(`${JSON.stringify({ ...idol, profile })}\n`);
+      } else {
+        process.stdout.write(`${renderIdol(idol, profile)}\n`);
+      }
+    } catch (e) {
+      emitError(e, json);
+    }
+  });
+
+program
+  .command('birthdays')
+  .description('list idols whose birthday falls in a MM/DD..MM/DD range (default: today, JST)')
+  .option('-b, --brand <code...>', 'filter by brand code or alias')
+  .option('--from <mmdd>', 'range start MM/DD (default: today, JST)')
+  .option('--to <mmdd>', 'range end MM/DD (default: same as --from)')
+  .option('--json', 'machine-readable JSON output')
+  .action((opts) => {
+    const json = Boolean(opts.json);
+    const from = normalizeMmdd(opts.from) ?? mmddTodayJst();
+    const to = normalizeMmdd(opts.to) ?? from;
+    const brands = resolveBrands(opts.brand, json);
+    let list = idolsByBirthday(from, to);
+    if (brands) list = list.filter((i) => brands.includes(i.brand));
+    if (json) {
+      process.stdout.write(`${JSON.stringify({ from, to, count: list.length, items: list })}\n`);
+      return;
+    }
+    if (!list.length) {
+      process.stderr.write(`no idol birthdays in ${from}..${to}\n`);
+      process.exit(0);
+    }
+    const body = list
+      .map((i) => `  ${i.birthday}  ${i.name}${i.kana ? `  (${i.kana})` : ''}  [${i.brand}]`)
+      .join('\n');
+    process.stdout.write(`birthdays ${from}..${to}  (${list.length})\n${body}\n`);
   });
 
 program

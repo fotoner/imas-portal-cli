@@ -21,6 +21,8 @@ imas news --json [--brand <CODE>...] [--limit N] [--category NEWS|SCHEDULE|LIVE-
 imas schedule --json [--brand <CODE>...] [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--limit N]
 imas search <keyword> --json [--brand <CODE>...] [--category NEWS|LIVE-EVENT] [--limit N]
 imas idols [query] --json [--brand <CODE>...]   # roster: find an idol's tag slug
+imas idol <name> --json [--full]                # one idol's profile (--full: CV, height, …)
+imas birthdays --json [--from MM/DD] [--to MM/DD] [--brand <CODE>...]  # birthday range
 imas show <id> --json          # one NEWS article incl. full body text (id like 01_7869)
 imas event <id> --json         # one LIVE/EVENT incl. sub-events (id from `imas schedule`)
 imas brands --json             # the known brand codes
@@ -53,6 +55,11 @@ Schedule items also have: `eventStart, eventEnd, eventPlace, eventUrl, eventDisp
   name (`春日未来`), or kana (`かすがみらい`) — names are resolved to slugs from the bundled
   341-idol roster. `--subcategory <CODE>` (GOODS, LIVE-EVENT, ...) works the same way.
   Use `imas idols <name>` to look up an idol's exact slug/brand if a name is ambiguous.
+- "OOO 프로필 / CV 알려줘" → `imas idol "OOO" --full --json` (encyclopedia: CV, blood type,
+  zodiac, height, weight, measurements, hometown, hobby). Without `--full` it returns the
+  basic profile (age, birthday, images, brand) with no extra fetch.
+- "오늘 생일 아이돌?" → `imas birthdays --json`. Range: `imas birthdays --from 06/01 --to 06/30
+  --brand GAKUEN --json`. Items carry name / kana / birthday (MM/DD) / brand.
 - "그 기사 내용 알려줘" (user references a news item) → `imas show <id> --json`, summarize `bodyText`.
 - "그 라이브 상세 알려줘" (user references a schedule item) → `imas event <id> --json`,
   summarize `eventDisplayDate`, `eventPlace`, `eventUrl`, and any `children` (sub-events).

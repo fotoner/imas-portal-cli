@@ -10,6 +10,10 @@ export interface Idol {
   code: string;
   name: string;
   kana: string | null;
+  age: string | null;
+  birthday: string | null; // "MM/DD"
+  images: string[];
+  detailUrl: string | null; // idol encyclopedia (名鑑) profile page
 }
 
 export const IDOLS: Idol[] = idolsData as Idol[];
@@ -62,4 +66,37 @@ export function searchIdols(query: string): Idol[] {
   return IDOLS.filter(
     (i) => i.code.includes(low) || norm(i.name).includes(n) || (i.kana ? norm(i.kana).includes(n) : false),
   );
+}
+
+/** "MM/DD" -> sortable month*100+day, or null. */
+export function birthdayKey(birthday: string | null): number | null {
+  if (!birthday) return null;
+  const m = /^(\d{1,2})\/(\d{1,2})$/.exec(birthday.trim());
+  if (!m) return null;
+  const month = Number(m[1]);
+  const day = Number(m[2]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  return month * 100 + day;
+}
+
+/**
+ * Idols whose birthday falls in [from, to] inclusive (each "MM/DD").
+ * Supports a year-end wraparound range (e.g. from 12/25 to 01/05). Sorted by date.
+ */
+export function idolsByBirthday(from: string, to: string, brand?: string): Idol[] {
+  const fromK = birthdayKey(from);
+  const toK = birthdayKey(to);
+  if (fromK == null || toK == null) return [];
+  const inRange = (k: number): boolean =>
+    fromK <= toK ? k >= fromK && k <= toK : k >= fromK || k <= toK;
+  const wraps = fromK > toK;
+  const sortKey = (i: Idol): number => {
+    const k = birthdayKey(i.birthday)!;
+    return wraps && k <= toK ? k + 1300 : k; // year-end wrap: early-year dates sort last
+  };
+  return IDOLS.filter((i) => {
+    if (brand && i.brand !== brand) return false;
+    const k = birthdayKey(i.birthday);
+    return k != null && inRange(k);
+  }).sort((a, b) => sortKey(a) - sortKey(b));
 }
