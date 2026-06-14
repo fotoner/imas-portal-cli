@@ -63,8 +63,6 @@ export interface ListQuery {
   tag?: string[];
   limit?: number;
   sort?: string;
-  /** extra keys merged into the `data` JSON (e.g. target_start_date) */
-  extra?: Record<string, unknown>;
 }
 
 export interface RawListResult {
@@ -73,7 +71,7 @@ export interface RawListResult {
 }
 
 function buildUrl(token: string, q: ListQuery): string {
-  const data: Record<string, unknown> = { category: [q.category], ...(q.extra ?? {}) };
+  const data: Record<string, unknown> = { category: [q.category] };
   if (q.brands && q.brands.length) data.brand = q.brands;
   if (q.subcategory && q.subcategory.length) data.subcategory = q.subcategory;
   if (q.tag && q.tag.length) data.tag = q.tag;

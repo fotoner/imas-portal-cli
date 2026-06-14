@@ -88,7 +88,8 @@ out to `imas schedule --json --brand CINDERELLAGIRLS ...`.
 
 ## JSON shape
 
-`news`/`schedule` → `{ "items": [...], "total": N, "stale": false }`.
+`news`/`schedule` → `{ "items": [...], "count": N, "total": N, "stale": false }`
+(`count` = items returned; `total` = available at the source for the query).
 Each item: `id, title, url, category, brands[], publishedAt` (ISO-8601 +09:00),
 `displayDate, hashtags[]`. Schedule items add `eventStart, eventEnd, eventPlace,
 eventUrl, eventDisplayDate, eventType[], eventArea[]`. `show` adds `bodyText`/`bodyHtml`.

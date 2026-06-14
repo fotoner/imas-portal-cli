@@ -34,14 +34,16 @@ describe('search (client-side keyword filter)', () => {
     mockList('news-list.json'); // first item title contains ミリオン
     const res = await search('ミリオン', { category: 'NEWS', limit: 10 });
     expect(res.items.length).toBeGreaterThan(0);
+    expect(res.count).toBe(res.items.length); // count = match count
     expect(res.items.every((i) => i.title.includes('ミリオン'))).toBe(true);
   });
 
-  it('returns no items for a non-matching keyword', async () => {
+  it('returns no items for a non-matching keyword (count 0, total = source available)', async () => {
     mockList('news-list.json');
     const res = await search('ZZZ_NO_SUCH_TERM_QQ', { category: 'NEWS', limit: 10 });
     expect(res.items).toEqual([]);
-    expect(res.total).toBe(0);
+    expect(res.count).toBe(0); // no keyword matches
+    expect(res.total).toBeGreaterThan(0); // but the source still reports a catalog total
   });
 
   it('is case-insensitive', async () => {

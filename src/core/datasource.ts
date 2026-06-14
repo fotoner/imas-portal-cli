@@ -39,13 +39,14 @@ async function listWithStaleFallback(
   try {
     const { items, total } = await fetcher();
     await writeCache(cacheKey, { items, total });
-    return { items, total, stale: false };
+    return { items, count: items.length, total, stale: false };
   } catch (e) {
     if (e instanceof ImasError && e.kind === 'API_DOWN') {
       const cached = await readCache<ListPayload>(cacheKey);
       if (cached) {
         return {
           items: cached.value.items,
+          count: cached.value.items.length,
           total: cached.value.total,
           stale: true,
           staleSince: cached.savedAt,
@@ -142,7 +143,7 @@ export async function search(
     limit,
   };
   return listWithStaleFallback(cacheKey, async () => {
-    const { articles } = await fetchArticleList({
+    const { articles, total } = await fetchArticleList({
       category,
       brands: q.brands,
       subcategory: q.subcategories,
@@ -150,7 +151,9 @@ export async function search(
       limit,
     });
     const matched = articles.filter((a) => needle === '' || haystack(a).includes(needle));
-    return { items: matched.map(normalizeArticle), total: matched.length };
+    // `total` = available at source for the server-side facets (the API's total_count);
+    // the keyword match count is `count` (=== items.length), set by listWithStaleFallback.
+    return { items: matched.map(normalizeArticle), total };
   });
 }
 
@@ -175,13 +178,28 @@ export async function getArticle(id: string): Promise<Article | ScheduleEvent> {
  * (that's `getArticle`/`imas show`, news only). The whole LIVE-EVENT catalog is
  * small (~220 items) and the list item already carries full detail incl. children,
  * so we fetch the full list once (stale-cached) and find the id. Reliable, one call.
+ *
+ * `ceil` is the first-pass fetch size. If the catalog has grown past it (we got back a
+ * full `ceil` items AND the API's total_count says more exist) and the id wasn't in that
+ * window, we widen to total_count once and retry — so a grown catalog can't make a real
+ * event silently report NOT_FOUND. `ceil` is parameterized only so tests can exercise
+ * the widen path without a 400-item fixture.
  */
-export async function getEvent(id: string): Promise<ScheduleEvent> {
-  const res = await listWithStaleFallback({ op: 'event-all' }, async () => {
-    const { articles, total } = await fetchArticleList({ category: 'LIVE-EVENT', limit: 400 });
-    return { items: articles.map(normalizeArticle), total };
-  });
-  const found = (res.items as ScheduleEvent[]).find((e) => e.id === id);
+export async function getEvent(id: string, ceil = 400): Promise<ScheduleEvent> {
+  const fetchAll = (limit: number): Promise<ListResult<Article | ScheduleEvent>> =>
+    listWithStaleFallback({ op: 'event-all', limit }, async () => {
+      const { articles, total } = await fetchArticleList({ category: 'LIVE-EVENT', limit });
+      return { items: articles.map(normalizeArticle), total };
+    });
+
+  let res = await fetchAll(ceil);
+  let found = (res.items as ScheduleEvent[]).find((e) => e.id === id);
+
+  if (!found && !res.stale && res.items.length >= ceil && res.total && res.total > res.items.length) {
+    res = await fetchAll(res.total);
+    found = (res.items as ScheduleEvent[]).find((e) => e.id === id);
+  }
+
   if (!found) {
     throw new ImasError('NOT_FOUND', `live event "${id}" not found. Run \`imas schedule\` to see valid ids.`);
   }

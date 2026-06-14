@@ -51,12 +51,18 @@ export const ScheduleEventSchema = ArticleSchema.extend({
   eventType: z.array(z.string()).default([]),
   eventArea: z.array(z.string()).default([]),
   children: z.array(SubEventSchema).default([]),
-  allDay: z.boolean().default(false),
 });
 export type ScheduleEvent = z.infer<typeof ScheduleEventSchema>;
 
 export interface ListResult<T> {
   items: T[];
+  /** Number of items actually returned, after all client-side filtering. Always === items.length. */
+  count: number;
+  /**
+   * Total available at the SOURCE for the server-side query (the CMS API's total_count),
+   * if the API reports one. NOT reduced by the client-side limit, date range, or keyword
+   * filter — so for schedule/search it can be larger than `count`. Undefined when unknown.
+   */
   total?: number;
   stale: boolean;
   staleSince?: string;

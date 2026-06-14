@@ -27,24 +27,46 @@ export function toJst(unix?: number | string | null): string | undefined {
   return `${get('year')}-${get('month')}-${get('day')}T${hour}:${get('minute')}:${get('second')}+09:00`;
 }
 
+/**
+ * Strip terminal-unsafe control characters from remote text before it reaches a TTY.
+ * Drops C0 (keeps tab and newline), CR, VT, FF, ESC, DEL, and the C1 block, so a
+ * portal-supplied article body cannot smuggle ANSI escape sequences into the terminal.
+ * This is the trust boundary between remote content and the user shell.
+ */
+export function stripControl(s: string): string {
+  let out = '';
+  for (const ch of s) {
+    const c = ch.codePointAt(0) ?? 0;
+    const isControl = c <= 0x08 || (c >= 0x0b && c <= 0x1f) || (c >= 0x7f && c <= 0x9f);
+    if (!isControl) out += ch;
+  }
+  return out;
+}
+
+/** Collapse the portal's newline-separated place strings to a single " / "-joined line. */
+export function normalizePlace(place?: string | null): string | null {
+  return place ? place.replace(/\s*\n\s*/g, ' / ').trim() : null;
+}
+
 /** Best-effort HTML -> plain text for `imas show`. Not a sanitizer. */
 export function stripHtml(html?: string): string | undefined {
   if (!html) return undefined;
-  return html
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<br\s*\/?>(?!\n)/gi, '\n')
-    .replace(/<\/(p|div|li|h\d)>/gi, '\n')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/[ \t]+/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  return stripControl(
+    html
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<br\s*\/?>(?!\n)/gi, '\n')
+      .replace(/<\/(p|div|li|h\d)>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n{3,}/g, '\n\n'),
+  ).trim();
 }
 
 function isInlineHtml(content?: string): boolean {
@@ -57,7 +79,7 @@ function normalizeSubEvent(raw: RawArticle): SubEvent {
     eventDisplayDate: raw.event_dspdate ?? null,
     eventStart: toJst(raw.event_startdate) ?? null,
     eventEnd: toJst(raw.event_enddate) ?? null,
-    eventPlace: raw.event_place ? raw.event_place.replace(/\s*\n\s*/g, ' / ').trim() : null,
+    eventPlace: normalizePlace(raw.event_place),
   };
 }
 
@@ -103,13 +125,12 @@ export function normalizeArticle(raw: RawArticle): Article | ScheduleEvent {
     ...base,
     eventStart: toJst(raw.event_startdate) ?? null,
     eventEnd: toJst(raw.event_enddate) ?? null,
-    eventPlace: raw.event_place ? raw.event_place.replace(/\s*\n\s*/g, ' / ').trim() : null,
+    eventPlace: normalizePlace(raw.event_place),
     eventUrl: raw.event_url ?? null,
     eventDisplayDate: raw.event_dspdate ?? null,
     eventType: raw.event_type ?? [],
     eventArea: raw.event_area ?? [],
     children: (raw.children ?? []).map(normalizeSubEvent),
-    allDay: false,
   };
   return event;
 }

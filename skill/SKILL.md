@@ -36,7 +36,9 @@ Brand codes: `IDOLMASTER` (765), `CINDERELLAGIRLS`, `MILLIONLIVE`, `SIDEM`,
 
 ## Output shape
 
-`news` / `schedule` print `{"items":[...],"total":N,"stale":false}`.
+`news` / `schedule` print `{"items":[...],"count":N,"total":N,"stale":false}`.
+`count` is how many items came back (=== `items.length`); `total` is how many exist at the
+source for the server-side query (can exceed `count` for schedule, which date-filters locally).
 Each item: `id, title, url, category, brands[], publishedAt (ISO +09:00), displayDate, hashtags[]`.
 Schedule items also have: `eventStart, eventEnd, eventPlace, eventUrl, eventDisplayDate, eventType[], eventArea[]`.
 `show` adds `bodyText` (and `bodyHtml`).
@@ -49,7 +51,8 @@ Schedule items also have: `eventStart, eventEnd, eventPlace, eventUrl, eventDisp
 - "아이마스 최신 뉴스 5개" → `imas news --json --limit 5`, list `title` + `publishedAt` + `url`.
 - "OOO 관련 뉴스 찾아줘" → `imas search "OOO" --json [--limit 200]`. Searches title /
   hashtags / idol names over the most recent `--limit` items (a window, not all history;
-  raise `--limit` to search deeper). `matches` in the output is the hit count.
+  raise `--limit` to search deeper). `count` in the output is the keyword hit count;
+  `searched` is the window size scanned; `total` is the catalog size at the source.
 - "특정 아이돌 뉴스 전부" → use the server-side tag facet (searches ALL history, exact):
   `imas news --tag <idol> --json`. `--tag` accepts the slug (`mirai_kasuga`), the kanji
   name (`春日未来`), or kana (`かすがみらい`) — names are resolved to slugs from the bundled

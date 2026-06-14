@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { toJst, stripHtml, normalizeArticle } from '../src/core/normalize';
+import { toJst, stripHtml, stripControl, normalizeArticle } from '../src/core/normalize';
 import type { ScheduleEvent } from '../src/core/schema';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -26,6 +26,25 @@ describe('toJst', () => {
 describe('stripHtml', () => {
   it('reduces markup to text', () => {
     expect(stripHtml('<p>hello <b>world</b></p>')).toBe('hello world');
+  });
+});
+
+describe('stripControl', () => {
+  const ESC = String.fromCharCode(0x1b);
+  const NUL = String.fromCharCode(0x00);
+  const C1 = String.fromCharCode(0x9b); // CSI in the C1 block
+
+  it('drops ESC / NUL / C1 control chars but keeps tab and newline', () => {
+    const input = `a${ESC}[31mred${NUL}\tb\nc${C1}`;
+    expect(stripControl(input)).toBe('a[31mred\tb\nc');
+  });
+
+  it('leaves plain text (incl. CJK) untouched', () => {
+    expect(stripControl('月村手毬 temari')).toBe('月村手毬 temari');
+  });
+
+  it('is applied by stripHtml so remote bodies cannot smuggle escapes', () => {
+    expect(stripHtml(`<p>safe${ESC}[2J</p>`)).toBe('safe[2J');
   });
 });
 

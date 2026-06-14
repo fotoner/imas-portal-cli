@@ -1,5 +1,6 @@
 import { getText } from './http';
 import { HttpError, ImasError } from './errors';
+import { stripControl } from './normalize';
 
 /**
  * L2 of the idol encyclopedia (アイドル名鑑). Each idol's roster record links to a
@@ -18,9 +19,7 @@ const DL_RE = /<dl>\s*<dt>(.*?)<\/dt>\s*<dd>(.*?)<\/dd>\s*<\/dl>/gs;
 const CV_RE = /<span>\s*CV\s*<\/span>\s*([^<]+)/i;
 
 function stripTags(s: string): string {
-  return s
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
+  return stripControl(s.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' '))
     .replace(/\s+/g, ' ')
     .trim();
 }

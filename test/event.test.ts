@@ -46,4 +46,21 @@ describe('getEvent (live-event detail by id)', () => {
 
     await expect(getEvent('99_99999')).rejects.toMatchObject({ kind: 'NOT_FOUND' });
   });
+
+  it('widens the fetch window when the catalog has grown past the first page', async () => {
+    const ev = (path: string) => ({ path, title: path, categories: { code: 'LIVE-EVENT' } });
+    // First page (ceil=1) returns 1 of 2 known events; the target lives beyond the window.
+    const page1 = { statusCode: 200, data: { article_list: [ev('01_A')], total_count: 2, count: 1 } };
+    const page2 = {
+      statusCode: 200,
+      data: { article_list: [ev('01_A'), ev('01_B')], total_count: 2, count: 2 },
+    };
+    const pool = agent.get(CMS);
+    pool.intercept({ path: (p) => p.includes('/Token/get') }).reply(200, fixture('token.json')).times(2);
+    pool.intercept({ path: (p) => p.includes('/Article/list') && p.includes('limit=1&') }).reply(200, page1);
+    pool.intercept({ path: (p) => p.includes('/Article/list') && p.includes('limit=2&') }).reply(200, page2);
+
+    const event = await getEvent('01_B', 1); // ceil=1 forces the widen path
+    expect(event.id).toBe('01_B');
+  });
 });
